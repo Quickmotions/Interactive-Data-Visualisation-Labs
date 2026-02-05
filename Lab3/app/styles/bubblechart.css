@@ -1,0 +1,8 @@
+svg.bubblechart {
+    border: solid 1px #333;
+}
+
+svg.bubblechart>circle.bubble {
+    stroke: #192b38;
+    stroke-width: 2px;
+}
