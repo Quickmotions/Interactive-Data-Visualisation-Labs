@@ -24,6 +24,11 @@ export default class BarChart {
 
         this.chart = this.svg.append('g')
             .attr('transform', `translate(${this.margin[3]}, ${this.margin[0]})`);
+
+        this.axisX = this.svg.append('g')
+            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`);
+        this.axisY = this.svg.append('g')
+            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
     }
 
     render(data) {
@@ -38,6 +43,12 @@ export default class BarChart {
             .attr('width', this.#scaleX.bandwidth())
             .attr('y', d => this.#scaleY(d.v))
             .attr('height', d => this.chartHeight - this.#scaleY(d.v));
+
+        // Update the axes
+        let xAxis = d3.axisBottom(this.#scaleX),
+            yAxis = d3.axisLeft(this.#scaleY);
+        this.axisX.call(xAxis);
+        this.axisY.call(yAxis);
     }
 
     #updateScales(data) {
