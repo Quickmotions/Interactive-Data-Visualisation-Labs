@@ -8,7 +8,6 @@
 */
 export default class BubbleChart {
     #scaleX;
-    #scaleY;
     #scaleR;
 
     constructor(container, width, height, margin) {
@@ -34,48 +33,39 @@ export default class BubbleChart {
     }
 
     render(data) {
-        this.data = data.map((d, i) => ({
-            k: d.k,
-            x: i,     // horizontal placement
-            y: 0,     // single row
-            r: +d.v   // bubble size
-        })); // transform the data into the format we need for the bubble chart
-
-        this.#updateScales();
+        this.#updateScales(data);
 
         // Update the circles
         this.chart
             .selectAll('circle')
-            .data(this.data, d => d.k)
+            .data(data, d => d.k)
             .join('circle')
-            .attr('cx', d => this.#scaleX(d.x))
-            .attr('cy', d => this.#scaleY(d.y))
-            .attr('r', d => this.#scaleR(d.r));
+            .attr('cx', d => this.#scaleX(d.k))
+            .attr('cy', d => this.chartHeight / 2)
+            .attr('r', d => this.#scaleR(d.v));
 
         // Update the axes
-        let xAxis = d3.axisBottom(this.#scaleX),
-            yAxis = d3.axisLeft(this.#scaleY);
+        let xAxis = d3.axisBottom(this.#scaleX);
         this.axisX.call(xAxis);
-        this.axisY.call(yAxis);
     }
 
-    #updateScales() {
+    #updateScales(data) {
         // Update scales here
-        let chartWidth = this.width - this.margin[2] - this.margin[3],
-            chartHeight = this.height - this.margin[0] - this.margin[1];
+        this.chartWidth = this.width - this.margin[2] - this.margin[3];
+        this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
-        let maxR = chartWidth / this.data.length / 2;
-        let rangeX = [maxR, chartWidth - maxR], // we want to leave some space on the right for the largest bubble
-            rangeY = [chartHeight, 0],
-            rangeR = [5, maxR]; // we want the largest bubble to be at most half the height of the chart
+        let minDistance = this.chartWidth / data.length;
+        let maxR = Math.min(this.chartHeight / 2, minDistance / 2);
+        let maxValue = d3.max(data, d => d.v);
 
-        let domainX = [Math.min(0, d3.min(this.data, d => d.x)), d3.max(this.data, d => d.x)], // we want to start at 0, even if the data has negative values
-            domainY = [Math.min(0, d3.min(this.data, d => d.y)), d3.max(this.data, d => d.y)],
-            domainR = [0, d3.max(this.data, d => d.r)];
+        this.#scaleX = d3.scalePoint()
+            .domain(data.map(d => d.k))
+            .range([maxR, this.chartWidth - maxR])
+            .padding(0.1);
 
-        this.#scaleX = d3.scaleLinear(domainX, rangeX);
-        this.#scaleY = d3.scaleLinear(domainY, rangeY);
-        this.#scaleR = d3.scaleSqrt(domainR, rangeR);
+        this.#scaleR = d3.scaleSqrt()
+            .domain([0, maxValue])
+            .range([5, maxR - 5]); // 5 px space between bubbles that are same value
     }
 
 }
