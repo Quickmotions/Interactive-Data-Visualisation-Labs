@@ -7,7 +7,7 @@
 export default class BarChart {
     #scaleX;
     #scaleY;
-
+    #scaleColor;
 
     constructor(container, width, height, margin) {
         this.container = container;
@@ -42,7 +42,8 @@ export default class BarChart {
             .attr('x', d => this.#scaleX(d.k))
             .attr('width', this.#scaleX.bandwidth())
             .attr('y', d => this.#scaleY(d.v))
-            .attr('height', d => this.chartHeight - this.#scaleY(d.v));
+            .attr('height', d => this.chartHeight - this.#scaleY(d.v))
+            .attr('fill', d => this.#scaleColor(d.v));
 
         // Update the axes
         let xAxis = d3.axisBottom(this.#scaleX),
@@ -68,6 +69,9 @@ export default class BarChart {
 
         // when this.#scaleX("B") is run, returns y px val for bar to start at
 
+        this.#scaleColor = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.v)])
+            .range(["#ff9f9f", "#960000"]);
     }
 
 }

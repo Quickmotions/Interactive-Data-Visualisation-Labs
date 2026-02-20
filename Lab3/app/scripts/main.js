@@ -14,7 +14,7 @@ let dogs = [{ breed: 'Golden Retriever', count: 8653, weight: 39.5, height: 56 }
 { breed: 'German Shepherd', count: 7067, weight: 31, height: 60 },
 { breed: 'Swiss Shepherd', count: 110, weight: 32.5, height: 60.5 }]
 
-let data1 = [{ k: 'key1', v: 400 }, { k: 'key2', v: 300 }, { k: 'key3', v: 200 }];
+let data1 = [{ k: 'key1', v: 400 }, { k: 'key2', v: 300 }, { k: 'key3', v: 200 }, { k: "key4", v: 47 }, { k: 'key5', v: 400 }, { k: 'key6', v: 300 }, { k: 'key7', v: 200 }, { k: "key8", v: 47 }];
 let data2 = [{ k: 'catA', v: 63 }, { k: 'catB', v: 54 }, { k: 'catC', v: 98 }, { k: 'catD', v: 98 }, { k: 'catE', v: 40 }];
 
 let barchart1 = new BarChart('div#bar1', 500, 300, [20, 20, 40, 40]);

@@ -9,6 +9,7 @@
 export default class BubbleChart {
     #scaleX;
     #scaleR;
+    #scaleColor;
 
     constructor(container, width, height, margin) {
         this.width = width;
@@ -42,7 +43,8 @@ export default class BubbleChart {
             .join('circle')
             .attr('cx', d => this.#scaleX(d.k))
             .attr('cy', d => this.chartHeight / 2)
-            .attr('r', d => this.#scaleR(d.v));
+            .attr('r', d => this.#scaleR(d.v))
+            .attr('fill', d => this.#scaleColor(d.v));
 
         // Update the axes
         let xAxis = d3.axisBottom(this.#scaleX);
@@ -66,6 +68,9 @@ export default class BubbleChart {
         this.#scaleR = d3.scaleSqrt()
             .domain([0, maxValue])
             .range([5, maxR - 5]); // 5 px space between bubbles that are same value
-    }
 
+        this.#scaleColor = d3.scaleLinear()
+            .domain([0, maxValue])
+            .range(["#a6cee3", "#1f78b4"]);
+    }
 }
