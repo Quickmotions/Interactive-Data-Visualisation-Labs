@@ -25,7 +25,12 @@ export default class BubbleChart {
             .classed('bubblechart', true);
 
         this.chart = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[3]}, ${this.margin[0]})`);
+            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
+
+        this.axisX = this.svg.append('g')
+            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`);
+        this.axisY = this.svg.append('g')
+            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
     }
 
     render(data) {
@@ -38,6 +43,7 @@ export default class BubbleChart {
 
         this.#updateScales();
 
+        // Update the circles
         this.chart
             .selectAll('circle')
             .data(this.data, d => d.k)
@@ -46,6 +52,11 @@ export default class BubbleChart {
             .attr('cy', d => this.#scaleY(d.y))
             .attr('r', d => this.#scaleR(d.r));
 
+        // Update the axes
+        let xAxis = d3.axisBottom(this.#scaleX),
+            yAxis = d3.axisLeft(this.#scaleY);
+        this.axisX.call(xAxis);
+        this.axisY.call(yAxis);
     }
 
     #updateScales() {
@@ -53,7 +64,7 @@ export default class BubbleChart {
         let chartWidth = this.width - this.margin[2] - this.margin[3],
             chartHeight = this.height - this.margin[0] - this.margin[1];
 
-        let maxR = this.width / this.data.length / 2 - 5; // gap of 5px between bubbles
+        let maxR = chartWidth / this.data.length / 2;
         let rangeX = [maxR, chartWidth - maxR], // we want to leave some space on the right for the largest bubble
             rangeY = [chartHeight, 0],
             rangeR = [5, maxR]; // we want the largest bubble to be at most half the height of the chart

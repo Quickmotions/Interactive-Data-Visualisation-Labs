@@ -5,6 +5,9 @@
   - margin: chart area margins [top, bottom, left, right]
 */
 export default class BarChart {
+    #scaleX;
+    #scaleY;
+
 
     constructor(container, width, height, margin) {
         this.container = container;
@@ -24,20 +27,36 @@ export default class BarChart {
     }
 
     render(data) {
-        const height = +this.svg.attr('height') - this.margin[0] - this.margin[1];
-        const barWidth = 40;
-        const gap = 5;
 
-        const maxValue = d3.max(data, d => d.v); // find max value for scaling from data
+        this.#updateScales(data);
 
         this.chart
             .selectAll('rect')
             .data(data, d => d.k)
             .join('rect')
-            .attr('x', (d, i) => i * (barWidth + gap))
-            .attr('width', barWidth)
-            .attr('height', d => (d.v / maxValue) * height) // scale bar height relative to maxValue
-            .attr('y', d => height - (d.v / maxValue) * height); // position bars from bottom up
+            .attr('x', d => this.#scaleX(d.k))
+            .attr('width', this.#scaleX.bandwidth())
+            .attr('y', d => this.#scaleY(d.v))
+            .attr('height', d => this.chartHeight - this.#scaleY(d.v));
+    }
+
+    #updateScales(data) {
+        this.chartWidth = this.width - this.margin[2] - this.margin[3];
+        this.chartHeight = this.height - this.margin[0] - this.margin[1];
+
+        this.#scaleX = d3.scaleBand() // scale used for categorical data
+            .domain(data.map(d => d.k)) // unpacks data find all items
+            .range([0, this.chartWidth])
+            .padding(0.1);  // 10% of band width as padding
+
+        // when this.#scaleX("B") is run, returns x pos for the bar
+
+        this.#scaleY = d3.scaleLinear() // scale used for numerical data to px
+            .domain([0, d3.max(data, d => d.v)]) // sets domain [0, maxVal]
+            .range([this.chartHeight, 0]); // inverted range height
+
+        // when this.#scaleX("B") is run, returns y px val for bar to start at
 
     }
+
 }
