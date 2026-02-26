@@ -1,0 +1,9 @@
+svg.barchart {
+    border: solid 1px #333;
+}
+
+svg.barchart>rect.bar {
+    fill: #4aba57;
+    stroke: #16381a;
+    stroke-width: 2px;
+}
