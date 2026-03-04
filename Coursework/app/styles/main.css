@@ -1,0 +1,22 @@
+@import 'vars.css';
+@import 'barchart.css';
+@import 'bubblechart.css';
+
+body,
+html {
+    height: 100%;
+}
+
+.outlined {
+    border: 2px solid #000;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.square-box {
+    aspect-ratio: 1 / 1;
+}
+
+.sidebar {
+    min-height: 100%;
+}
