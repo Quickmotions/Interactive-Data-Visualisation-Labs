@@ -10,7 +10,6 @@ export default class LineChart {
         this.height = height;
         this.margin = margin;
 
-        // Append the SVG element
         this.svg = d3.select(container)
             .append('svg')
             .attr('width', this.width)
@@ -38,8 +37,6 @@ export default class LineChart {
             .x(d => this.#scaleX(d.y))   // year
             .y(d => this.#scaleY(d.c));  // count
 
-        // creating a path, joining datum
-        // drawing with the line generator
         this.chart.append('path')
             .datum(data)
             .attr("fill", "none")
@@ -47,9 +44,9 @@ export default class LineChart {
             .attr("stroke-width", 3)
             .attr('d', lineGen);
 
-        // Update the axes
+        // axes
         let xAxis = d3.axisBottom(this.#scaleX)
-            .tickFormat(d3.format("d"));  // integer, no commas
+            .tickFormat(d3.format("d")); // integer format
         let yAxis = d3.axisLeft(this.#scaleY);
         this.axisX.call(xAxis);
         this.axisY.call(yAxis);

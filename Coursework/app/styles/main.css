@@ -8,7 +8,6 @@ html {
     margin: 0;
 }
 
-
 .outlined {
     border: 2px solid #000;
     background-color: #f8f9fa;
@@ -36,4 +35,9 @@ html {
     overflow-y: auto;
     height: 200px;
     overscroll-behavior: contain;
+}
+
+.bubble-tooltip {
+    pointer-events: none;
+    z-index: 999;
 }

@@ -9,7 +9,6 @@ export default class BarChart {
     #scaleY;
     #scaleColor;
 
-
     constructor(container, margin) {
         this.container = d3.select(container);
         this.margin = margin;
@@ -21,7 +20,7 @@ export default class BarChart {
         this.fixedMin = 0;
         this.fixedMax = null;
 
-
+        // Containers
         this.svg = d3.select(container)
             .append('svg')
             .classed('barchart', true);
@@ -54,6 +53,15 @@ export default class BarChart {
 
         this.axisX.call(xAxis);
         this.axisY.call(yAxis);
+
+        // Axes Labels
+        this.svg.selectAll('.x-axis-label').data([null]).join('text')
+            .attr('class', 'x-axis-label')
+            .attr('x', this.margin[2] + this.chartWidth / 2)
+            .attr('y', this.height - 10)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '12px')
+            .text('Total energy usage (Mtoe)');
     }
 
     enableAutoResize(data) {
@@ -96,6 +104,7 @@ export default class BarChart {
             .range(["#ff9f9f", "#960000"]);
     }
 
+    // adapter for new input into older graph from lab 
     #formatData(data) {
         return Object.entries(data)
             .filter(([key]) => key !== "Year")
