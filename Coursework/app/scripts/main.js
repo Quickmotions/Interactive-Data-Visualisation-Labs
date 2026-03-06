@@ -1,6 +1,7 @@
 'use strict';
 
 import DataManager from './DataManager.js';
+import Dashboard from './Dashboard.js';
 import BarChart from './BarChart.js';
 import BubbleChart from './BubbleChart.js';
 import LineChart from './LineChart.js';
@@ -12,42 +13,24 @@ const dataPaths = {
     table3: "data/RenewableAndWasteSourcesEnergyUse.csv"
 };
 
+const dm = new DataManager();
 
-async function init() {
-    const dataManager = new DataManager(dataPaths);
 
-    // optional: listen when data is loaded
-    dataManager.onDataLoaded(() => {
-        console.log("Data loaded!");
+Promise.all([
+    dm.loadIndustryTable(dataPaths.table1),
+    dm.loadIndustryTable(dataPaths.table2),
+    dm.loadSourcesTable(dataPaths.table3)
+]).then(([direct, reallocated, sources]) => {
 
-        // console.log(dataManager.sourcesEnergyUse)
-
-        const data1 = dataManager.getEnergyTablebySource('Solar Photovoltaic');
-        let barchart1 = new BarChart('div#bar1', [20, 20, 100, 30]);
-        barchart1.render(data1);
-
-        const data2 = dataManager.getDirectIndustryTableOnYear(2023);
-        let barchart2 = new BarChart('div#bar2', [20, 20, 100, 30]);
-        barchart2.render(data2);
-
+    const dashboard = new Dashboard({
+        industryDirect: direct,
+        industryReallocated: reallocated,
+        sources: sources,
+        sliderId: "yearSlider",
+        labelId: "yearLabel",
+        yearChart: new BarChart('div#bar1', [30, 20, 150, 10]),
+        sourcesChart: new BubbleChart('div#bar2', [30, 30, 30, 30]),
+        initialYear: 2023
     });
 
-    await dataManager.loadData();
-}
-
-
-// let data1 = [{ industry: 'catA', amount: 23 }, { industry: 'catB', amount: 54 }, { industry: 'catC', amount: 98 }, { industry: 'catD', amount: 37 }];
-
-// let barchart1 = new BarChart('div#bar1', [30, 20, 30, 10]);
-// let barchart2 = new BarChart('div#bar2', [30, 20, 30, 10]);
-// let bubblechart = new BubbleChart('div#bubble1', 600, 300, [30, 30, 30, 30]);
-
-// let data1 = [{ k: 'key1', v: 400 }, { k: 'key2', v: 300 }, { k: 'key3', v: 200 }];
-// barchart1.render(data1);
-// barchart1.enableAutoResize();
-// barchart2.render(data2);
-// barchart2.enableAutoResize();
-// bubblechart.render(data2);
-// bubblechart.enableBrush();
-
-init();
+});

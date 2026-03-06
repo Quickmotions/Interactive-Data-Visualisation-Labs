@@ -9,20 +9,27 @@ export default class BarChart {
     #scaleY;
     #scaleColor;
 
+
     constructor(container, margin) {
         this.container = d3.select(container);
         this.margin = margin;
-        // initial dimensions are unknown until resize
-        this.width = 0;
+        this.width = 0; // updates in #resize
         this.height = 0;
 
-        // Append the SVG element
+        // Flags
+        this.fixedScaleEnabled = false;
+        this.fixedMin = 0;
+        this.fixedMax = null;
+
+
         this.svg = d3.select(container)
             .append('svg')
             .classed('barchart', true);
 
         this.chart = this.svg.append('g')
             .attr('transform', `translate(${this.margin[3]}, ${this.margin[0]})`);
+
+        // Axes
         this.axisX = this.svg.append('g');
         this.axisY = this.svg.append('g');
     }
@@ -57,35 +64,45 @@ export default class BarChart {
         observer.observe(this.container.node());
     }
 
+    setFixedScales(min, max) {
+        this.fixedScaleEnabled = true;
+        this.fixedMin = min;
+        this.fixedMax = max;
+    }
+
     #updateScales(data) {
         this.chartWidth = this.width - this.margin[2] - this.margin[3];
         this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
-        // Horizontal value scale (bar length → left to right)
+        const maxValue = this.fixedScaleEnabled && this.fixedMax !== null
+            ? this.fixedMax
+            : d3.max(data, d => d.v);
+
+        const minValue = this.fixedScaleEnabled
+            ? this.fixedMin
+            : 0;
+
         this.#scaleX = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.v)])
+            .domain([minValue, maxValue])
             .range([0, this.chartWidth]);
 
-        // Vertical category scale
         this.#scaleY = d3.scaleBand()
             .domain(data.map(d => d.k))
             .range([0, this.chartHeight])
             .padding(0.1);
 
         this.#scaleColor = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.v)])
+            .domain([minValue, maxValue])
             .range(["#ff9f9f", "#960000"]);
     }
 
     #formatData(data) {
-        return data.map(obj => {
-            const values = Object.values(obj);
-
-            return {
-                k: values[0],
-                v: values[1]
-            };
-        });
+        return Object.entries(data)
+            .filter(([key]) => key !== "Year")
+            .map(([key, value]) => ({
+                k: key,
+                v: value
+            }));
     }
 
     #resize() {

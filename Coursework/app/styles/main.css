@@ -5,9 +5,20 @@
 body,
 html {
     height: 100%;
+    margin: 0;
 }
 
+
 .outlined {
+    border: 2px solid #000;
+    background-color: #f8f9fa;
+}
+
+.sidebar.outlined {
+    border-top: none;
+}
+
+.outlined-rounded {
     border: 2px solid #000;
     background-color: #f8f9fa;
     border-radius: 10px;
@@ -19,4 +30,10 @@ html {
 
 .sidebar {
     min-height: 100%;
+}
+
+.button-list {
+    overflow-y: auto;
+    height: 200px;
+    overscroll-behavior: contain;
 }

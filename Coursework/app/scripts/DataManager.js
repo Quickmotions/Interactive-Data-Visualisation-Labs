@@ -1,118 +1,92 @@
-export default class DataManager {
+class DataManager {
+    constructor() { }
 
-    constructor(paths) {
-        this.paths = paths;
+    fixLowValue(value) {
+        if (!value || value === "[low]") return 0;
 
-        this.industryEnergyUseDirect = [];
-        this.industryEnergyUseReallocated = [];
-        this.sourcesEnergyUse = [];
-        this.listeners = [];
+        const num = parseFloat(value);
+        return isNaN(num) ? 0 : num;
     }
 
-    async loadData() {
-        try {
-            const t1 = await d3.csv(this.paths.table1);
-            const t2 = await d3.csv(this.paths.table2);
-            const t3 = await d3.csv(this.paths.table3);
+    async loadIndustryTable(path = "data/sales.csv") {
+        return await d3.csv(path, d => ({
+            Year: parseInt(d.Year),
 
-            this.industryEnergyUseDirect = this.parseTable(t1);
-            this.industryEnergyUseReallocated = this.parseTable(t2);
-            this.sourcesEnergyUse = this.parseTable(t3);
+            Agriculture: this.fixLowValue(d.Agriculture),
+            Mining: this.fixLowValue(d.Mining),
+            Manufacturing: this.fixLowValue(d.Manufacturing),
 
-            this.notify();
-        } catch (err) {
-            console.error("Error loading CSV files:", err);
-        }
+            ElectricityGas: this.fixLowValue(d["Electricity & Gas"]),
+            WaterSupply: this.fixLowValue(d["Water Supply"]),
+            Construction: this.fixLowValue(d.Construction),
+
+            RetailVehicles: this.fixLowValue(d["Retail & Vehicles"]),
+            TransportStorage: this.fixLowValue(d["Transport & Storage"]),
+            AccommodationFoodServices: this.fixLowValue(d["Accommodation & Food Services"]),
+            InformationCommunication: this.fixLowValue(d["Information & Communication"]),
+
+            FinancialInsurance: this.fixLowValue(d["Financial & Insurance"]),
+            RealEstate: this.fixLowValue(d["Real Estate"]),
+            ProfessionalScience: this.fixLowValue(d["Professional & Science"]),
+
+            Administrative: this.fixLowValue(d.Administrative),
+            PublicSector: this.fixLowValue(d["Public Sector"]),
+
+            Education: this.fixLowValue(d.Education),
+            Health: this.fixLowValue(d.Health),
+
+            ArtsRecreation: this.fixLowValue(d["Arts & Recreation"]),
+            OtherServices: this.fixLowValue(d["Other Services"]),
+            Households: this.fixLowValue(d.Households),
+
+            ConsumerExpenditure: this.fixLowValue(d["Consumer Expenditure"]),
+            Total: this.fixLowValue(d.Total)
+        }));
     }
+    async loadSourcesTable(path = "data/sales.csv") {
+        return await d3.csv(path, d => ({
+            Year: parseInt(d.Year),
+            HydroelectricPower: this.fixLowValue(d["Hydroelectric Power"]),
+            WindWaveTidal: this.fixLowValue(d["Wind Wave Tidal"]),
+            SolarPhotovoltaic: this.fixLowValue(d["Solar Photovoltaic"]),
+            GeothermalAquifers: this.fixLowValue(d["Geothermal Aquifers"]),
 
-    parseTable(data) {
-        return data.map(row => {
-            const parsed = {};
+            LandfillGas: this.fixLowValue(d["Landfill Gas"]),
+            SewageGas: this.fixLowValue(d["Sewage Gas"]),
+            Biogas: this.fixLowValue(d.Biogas),
 
-            Object.keys(row).forEach(key => {
-                const value = row[key];
+            MunicipalSolidWaste: this.fixLowValue(d["Municipal Solid Waste"]),
+            NonMunicipalSolidWaste: this.fixLowValue(d["Non-Municipal Solid Waste"]),
 
-                if (value === "" || value == null) {
-                    parsed[key] = null;
-                } else if (value === "[low]") {
-                    parsed[key] = 0
-                } else if (!isNaN(value)) {
-                    parsed[key] = +value;
-                } else {
-                    parsed[key] = value;
-                }
-            });
+            AnimalBiomass: this.fixLowValue(d["Animal Biomass"]),
+            PlantBiomass: this.fixLowValue(d["Plant Biomass"]),
+            Straw: this.fixLowValue(d.Straw),
 
-            return parsed;
-        });
+            Wood: this.fixLowValue(d.Wood),
+            WoodDry: this.fixLowValue(d["Wood - Dry"]),
+            WoodSeasoned: this.fixLowValue(d["Wood - Seasoned"]),
+            WoodWet: this.fixLowValue(d["Wood - Wet"]),
+
+            Coffeelogs: this.fixLowValue(d["Coffee logs"]),
+            Woodchip: this.fixLowValue(d.Woodchip),
+            WoodPellets: this.fixLowValue(d["Wood Pellets"]),
+            WoodBriquettes: this.fixLowValue(d["Wood Briquettes"]),
+
+            Charcoal: this.fixLowValue(d.Charcoal),
+
+            LiquidBiofuels: this.fixLowValue(d["Liquid bio-fuels"]),
+            Bioethanol: this.fixLowValue(d.Bioethanol),
+            Biodiesel: this.fixLowValue(d.Biodiesel),
+            SustainableAviationFuel: this.fixLowValue(d["Sustainable Aviation Fuel"]),
+
+            CrossBoundaryAdjustment: this.fixLowValue(d["Cross-boundary Adjustment"]),
+            EnergyFromRenewableWasteSources: this.fixLowValue(d["Energy from Renewable & Waste Sources"]),
+            TotalEnergyConsumptionPrimaryFuels: this.fixLowValue(d["Total Energy Consumption of Primary Fuels"]),
+
+            PercentageFromRenewableSources: d["Percentage From Renewable Sources"]
+                ? parseFloat(d["Percentage From Renewable Sources"].replace("%", "")) / 100
+                : 0
+        }));
     }
-
-    onDataLoaded(callback) {
-        this.listeners.push(callback);
-    }
-
-    notify() {
-        this.listeners.forEach(cb => cb());
-    }
-
-    getEnergyTable() {
-        return this.sourcesEnergyUse;
-    }
-    getDirectIndustryTable() {
-        return this.industryEnergyUseDirect;
-    }
-    getReallocatedIndustryTable() {
-        return this.industryEnergyUseReallocated;
-    }
-
-    getDirectIndustryTableOnYear(year) {
-        const record = this.industryEnergyUseDirect.find(d => d.Industry === year);
-        if (!record) return [];
-
-        return Object.entries(record)
-            .filter(([key, value]) =>
-                key !== 'Industry' &&
-                key !== 'Total' &&
-                key !== 'Consumer expenditure' &&
-                key !== 'Households' &&
-                value !== null &&
-                typeof value === 'number'
-            )
-            .map(([key, value]) => ({
-                k: key,
-                v: value
-            }));
-    }
-
-    getEnergyTablebySource(source) {
-        if (!source || typeof source !== 'string') return [];
-        if (!this.sourcesEnergyUse || this.sourcesEnergyUse.length === 0) return [];
-
-        const normalize = s => String(s)
-            .trim()
-            .toLowerCase()
-            .replace(/[^0-9a-z]+/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        const target = normalize(source);
-
-        const first = this.sourcesEnergyUse[0];
-        let actualKey = null;
-        for (const key of Object.keys(first)) {
-            if (key === 'Source') continue;
-            if (normalize(key) === target) {
-                actualKey = key;
-                break;
-            }
-        }
-        if (!actualKey) return [];
-
-        const table = this.sourcesEnergyUse
-            .map(row => ({ k: row.Source, v: row[actualKey] }))
-            .filter(({ k, v }) => k != null && v != null && typeof v === 'number');
-
-        return table.sort((a, b) => a.k - b.k);
-    }
-
 }
+export default DataManager;

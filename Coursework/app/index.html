@@ -15,10 +15,10 @@
 </head>
 
 <body>
-    <div class="container-fluid vh-100 d-flex flex-column">
+    <div class="container-fluid vh-100 d-flex flex-column p-0">
 
         <!-- Top Bar -->
-        <div class="row g-3">
+        <div class="row g-0 px-0">
             <div class="col-12">
                 <div class="outlined p-3 text-center">
                     Top Bar
@@ -27,7 +27,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="row flex-grow-1 g-3 mt-1">
+        <div class="row flex-grow-1 g-0">
 
             <!-- Sidebar -->
             <div class="col-2">
@@ -42,17 +42,32 @@
             </div>
 
             <!-- Right Content Area -->
-            <div class="col-10 d-flex flex-column">
+            <div class="col-10 d-flex flex-column g-3">
 
                 <!-- Top Section -->
                 <div class="row g-2 flex-grow-1">
                     <div class="col-4">
-                        <div class="outlined h-100 p-3">
-                            Top Left Square
+                        <div class="outlined-rounded h-100 p-3 text-center">
+                            <!-- Top Left Section -->
+                            <div class="row h-50">
+                                <div class="col-6 border p-3">
+                                    <input id="yearSlider" type="range" min="1980" max="2023" step="1" value="2023">
+                                    <span id="yearLabel">2020</span>
+                                </div>
+                                <div class="col-6 border p-3">
+                                    <button id="changeYearTableDirect">Direct Usage</button>
+                                    <button id="changeYearTableReallocated">Reallocated Usage</button>
+                                </div>
+                            </div>
+                            <div class="row h-50">
+                                <div class="col-6 border p-3">3</div>
+                                <div class="col-6 border p-3">4</div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-8">
-                        <div class="outlined h-100 p-3">
+                        <div class="outlined-rounded h-100 p-3">
+                            <!-- Top Right Section -->
                             <div id="bar1" class="w-100 h-100"></div>
                         </div>
                     </div>
@@ -61,13 +76,27 @@
                 <!-- Bottom Section -->
                 <div class="row g-3 mt-1 mb-2" style="height: 50%;">
                     <div class="col-8">
-                        <div class="outlined h-100 p-3">
+                        <div class="outlined-rounded h-100 p-3">
+                            <!-- Bottom Left Section -->
                             <div id="bar2" class="w-100 h-100"></div>
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="outlined h-100 p-3">
-                            Bottom Right Narrow Container
+                        <div class="outlined-rounded h-100 d-flex flex-column p-3">
+                            <!-- Bottom Right Section -->
+                            <div class="button-list flex-grow-1 overflow-auto">
+                                <button class="btn btn-primary w-100 mb-2">Button 1</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 2</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 3</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 4</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 5</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 6</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 7</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 8</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 9</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 10</button>
+                                <button class="btn btn-primary w-100 mb-2">Button 11</button>
+                            </div>
                         </div>
                     </div>
                 </div>
