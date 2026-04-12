@@ -5,6 +5,7 @@ import Dashboard from './Dashboard.js';
 import BarChart from './BarChart.js';
 import BubbleChart from './BubbleChart.js';
 import DonutChart from './DonutChart.js';
+import LineChart from './LineChart.js';
 
 
 const dataPaths = {
@@ -31,6 +32,7 @@ Promise.all([
         yearChart: new BarChart('div#bar1', [30, 40, 150, 10]),
         sourcesChart: new BubbleChart('div#bubble1', [20, 45, 60, 20]),
         donutChart: new DonutChart('div#donut1', [20, 20, 20, 20]),
+        lineChart: new LineChart('div#line1', [30, 40, 20, 30]),
         initialYear: 2023
     });
 

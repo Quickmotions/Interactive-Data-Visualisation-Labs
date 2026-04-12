@@ -1,75 +1,130 @@
-// Lab 4 Line Chart
-
 export default class LineChart {
     #scaleX;
     #scaleY;
-    #scaleCurve;
 
-    constructor(container, width, height, margin) {
-        this.width = width;
-        this.height = height;
+    constructor(container, margin) {
+        this.container = d3.select(container);
         this.margin = margin;
+        this.width = 0;
+        this.height = 0;
+
+        this.linesData = []; // [{ id, data }]
+        this.color = d3.scaleOrdinal(d3.schemeCategory10);
 
         this.svg = d3.select(container)
             .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height)
             .classed('linechart', true);
 
         this.chart = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
+            .attr('transform', `translate(${this.margin[3]}, ${this.margin[0]})`);
 
-        this.axisX = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`);
-        this.axisY = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
+        this.axisX = this.svg.append('g');
+        this.axisY = this.svg.append('g');
+
+        // Line generator
+        this.line = d3.line()
+            .x(d => this.#scaleX(d.k))
+            .y(d => this.#scaleY(d.v));
     }
 
-    render(data) {
+    addLine(dataMap, industry) {
+        const formatted = this.#formatIndustryLine(dataMap, industry);
 
-        data = data.sort((a, b) => d3.ascending(a.y, b.y));
+        this.linesData.push({
+            id: industry,
+            data: formatted
+        });
 
-        this.#updateScales(data);
-
-        // line generator
-        let lineGen = d3.line()
-            .curve(d3.curveMonotoneX)
-            .x(d => this.#scaleX(d.y))   // year
-            .y(d => this.#scaleY(d.c));  // count
-
-        this.chart.append('path')
-            .datum(data)
-            .attr("fill", "none")
-            .attr("stroke", "coral")
-            .attr("stroke-width", 3)
-            .attr('d', lineGen);
-
-        // axes
-        let xAxis = d3.axisBottom(this.#scaleX)
-            .tickFormat(d3.format("d")); // integer format
-        let yAxis = d3.axisLeft(this.#scaleY);
-        this.axisX.call(xAxis);
-        this.axisY.call(yAxis);
-
+        this.render();
     }
 
-    #updateScales(data) {
+    render() {
+        this.#resize();
+
+        const allData = this.linesData.flatMap(d => d.data);
+        this.#updateScales(allData);
+
+        // LINE GENERATOR (updated each render)
+        const lineGen = d3.line()
+            .x(d => this.#scaleX(d.k))
+            .y(d => this.#scaleY(d.v));
+
+        // DRAW LINES
+        this.chart.selectAll('.line-path')
+            .data(this.linesData, d => d.id)
+            .join('path')
+            .attr('class', 'line-path')
+            .attr('fill', 'none')
+            .attr('stroke', d => this.color(d.id))
+            .attr('stroke-width', 2)
+            .attr('d', d => lineGen(d.data));
+
+        this.axisX.call(d3.axisBottom(this.#scaleX));
+        this.axisY.call(d3.axisLeft(this.#scaleY));
+    }
+
+    enableAutoResize(data) {
+        const observer = new ResizeObserver(() => {
+            this.render(data);
+        });
+        observer.observe(this.container.node());
+    }
+
+    clear() {
+        this.linesData = [];
+        this.render();
+    }
+
+    #updateScales(allData) {
         this.chartWidth = this.width - this.margin[2] - this.margin[3];
         this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
-        let minYear = d3.min(data, d => d.y);
-        let maxYear = d3.max(data, d => d.y);
-        let maxCount = d3.max(data, d => d.c);
-        let minCount = d3.min(data, d => d.c);
-
-
-        this.#scaleX = d3.scaleLinear()
-            .domain([minYear, maxYear])
+        this.#scaleX = d3.scalePoint()
+            .domain([...new Set(allData.map(d => d.k))])
             .range([0, this.chartWidth]);
 
         this.#scaleY = d3.scaleLinear()
-            .domain([minCount, maxCount])
+            .domain([
+                0,
+                d3.max(allData, d => d.v)
+            ])
             .range([this.chartHeight, 0]);
+    }
 
+    #formatIndustryLine(dataMap, industry) {
+        return Array.from(dataMap.entries())
+            .sort((a, b) => a[0] - b[0]) // ensure years are ordered
+            .map(([year, arr]) => {
+                const record = arr[0]; // your array always has one object
+                return {
+                    k: +year,                 // x (year)
+                    v: record[industry] ?? 0 // y (value for that industry)
+                };
+            });
+    }
+
+
+
+    #resize() {
+        const bounds = this.container.node().getBoundingClientRect();
+
+        this.width = bounds.width;
+        this.height = bounds.height;
+
+        this.chartWidth = this.width - this.margin[2] - this.margin[3];
+        this.chartHeight = this.height - this.margin[0] - this.margin[1];
+
+        this.svg
+            .attr('width', this.width)
+            .attr('height', this.height);
+
+        this.chart
+            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
+
+        this.axisX
+            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`);
+
+        this.axisY
+            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
     }
 }

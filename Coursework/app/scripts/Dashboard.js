@@ -14,6 +14,8 @@ export default class Dashboard {
         this.yearChart = options.yearChart; // bar chart
         this.yearChart.setFixedScales(0, 10); // easier to see changes when fixed
 
+        this.lineChart = options.lineChart;
+
         this.sourcesChart = options.sourcesChart; // bubble chart
         this.sourcesChart.enableZoom();
 
@@ -31,6 +33,7 @@ export default class Dashboard {
 
         this.#bindEvents();
         this.render();
+        this.renderLine();
     }
 
     #bindEvents() {
@@ -43,12 +46,16 @@ export default class Dashboard {
         document.getElementById("changeYearTableDirect")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsDirect;
+                this.lineChart.clear();
+                this.renderLine()
                 this.render();
             });
 
         document.getElementById("changeYearTableReallocated")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsReallocated;
+                this.lineChart.clear();
+                this.renderLine();
                 this.render();
             });
 
@@ -70,7 +77,14 @@ export default class Dashboard {
             this.label.textContent = this.currentYear; // visual year indicator
         }
     }
+    renderLine() {
+        const firstEntry = this.currentYearTable.values().next().value[0];
+        for (const key in firstEntry) {
+            if (key === "Year" || key === "Total") continue;
 
+            this.lineChart.addLine(this.currentYearTable, key);
+        }
+    }
     #removeTotal(record) {
         return Object.fromEntries(
             Object.entries(record)
@@ -130,5 +144,4 @@ export default class Dashboard {
         }
         return donutAnalysis;
     }
-
 }

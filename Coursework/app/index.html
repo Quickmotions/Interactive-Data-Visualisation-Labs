@@ -6,109 +6,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Prototype</title>
 
-    <!-- Libraries and stylesheets imports -->
     <link rel="stylesheet" href="styles/main.css">
     <script src="libs/d3.v7.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-
 </head>
 
 <body>
-    <div class="container-fluid vh-100 d-flex flex-column p-0">
+
+    <div class="app">
 
         <!-- Top Bar -->
-        <div class="row g-0 px-0">
-            <div class="col-12">
-                <div class="outlined p-3 text-center">
-                    Dashboard Prototype
-                </div>
-            </div>
-        </div>
+        <header class="topbar">
+            Dashboard Prototype
+        </header>
 
-        <!-- Main Content -->
-        <div class="row flex-grow-1 g-0">
+        <!-- Main Layout -->
+        <div class="main">
 
             <!-- Sidebar -->
-            <div class="col-2">
-                <div class="outlined sidebar p-3 h-100">
-                    <h5>Sidebar Menu</h5>
-                </div>
-            </div>
+            <aside class="sidebar">
+                <h5>Sidebar Menu</h5>
+            </aside>
 
-            <!-- Right Content Area -->
-            <div class="col-10 d-flex flex-column g-3">
+            <!-- Content -->
+            <section class="content">
 
                 <!-- Top Section -->
-                <div class="row g-2 flex-grow-1">
-                    <div class="col-4">
-                        <div class="outlined-rounded h-100 p-3 text-center">
-                            <!-- Top Left Section -->
-                            <div class="row h-50">
-                                <div class="col-6 border p-3">
-                                    <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
-                                    <span id="yearLabel">2020</span>
-                                </div>
-                                <div class="col-6 border p-3">
-                                    <button id="changeYearTableDirect" class="btn btn-primary w-100 mb-2">Direct
-                                        Usage</button>
-                                    <button id="changeYearTableReallocated"
-                                        class="btn btn-primary w-100 mb-2">Reallocated Usage</button>
-                                </div>
+                <div class="top-section">
+
+                    <!-- Left Panel -->
+                    <div class="panel-left">
+
+                        <div class="top-controls">
+                            <div class="box">
+                                <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
+                                <span id="yearLabel">2020</span>
                             </div>
-                            <div class="row h-50">
-                                <div class="col-6 border p-3"><!-- box 3 --></div>
-                                <div class="col-6 border p-3"><!--box 4--></div>
+
+                            <div class="box">
+                                <button id="changeYearTableDirect">Direct Usage</button>
+                                <button id="changeYearTableReallocated">Reallocated Usage</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-8">
-                        <div class="outlined-rounded h-100 p-3">
-                            <!-- Top Right Section -->
-                            <div id="bar1" class="w-100 h-100"></div>
+
+                        <div class="bottom-grid">
+                            <div class="mini-box"></div>
+                            <div id="line1" class="viz"></div>
+                            <div class="mini-box"></div>
                         </div>
+
                     </div>
+
+                    <!-- Right Panel -->
+                    <div class="panel-right">
+                        <div id="bar1" class="viz"></div>
+                    </div>
+
                 </div>
 
                 <!-- Bottom Section -->
-                <div class="row g-3 mt-1 mb-2" style="height: 50%;">
-                    <div class="col-8">
-                        <div class="outlined-rounded h-100 p-3">
-                            <!-- Bottom Left Section -->
-                            <div id="bubble1" class="w-100 h-100"></div>
-                        </div>
+                <div class="bottom-section">
+
+                    <div class="bottom-left">
+                        <div id="bubble1" class="viz"></div>
                     </div>
-                    <div class="col-4">
-                        <div class="outlined-rounded h-100 d-flex flex-column p-3">
-                            <!-- Bottom Right Section -->
-                            <!-- <div class="button-list flex-grow-1 overflow-auto">  FOR USE LATER IN DASHBOARD
-                                <button class="btn btn-primary w-100 mb-2">Button 1</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 2</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 3</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 4</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 5</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 6</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 7</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 8</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 9</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 10</button>
-                                <button class="btn btn-primary w-100 mb-2">Button 11</button>
-                            </div> -->
-                            <div id="donut1" class="w-100 h-100"></div>
-                        </div>
+
+                    <div class="bottom-right">
+                        <div id="donut1" class="viz"></div>
                     </div>
+
                 </div>
 
-            </div>
+            </section>
         </div>
     </div>
 
-
-    <!-- Script imports -->
-    <!-- <script src="libs/bootstrap.min.js"></script> -->
-    <!-- <script type="module" src="libs/popper.v2.min.js"></script>
-    <script type="module" src="libs/tippy.v6.min.js"></script> -->
     <script type="module" src="scripts/main.js"></script>
+
 </body>
 
 </html>
