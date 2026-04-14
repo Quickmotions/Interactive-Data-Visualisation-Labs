@@ -23,16 +23,14 @@ export default class LineChart {
 
         // Line generator
         this.line = d3.line()
-            .x(d => this.#scaleX(d.k))
-            .y(d => this.#scaleY(d.v));
+            .x(d => this.#scaleX(d.x))
+            .y(d => this.#scaleY(d.y));
     }
 
-    addLine(dataMap, industry) {
-        const formatted = this.#formatIndustryLine(dataMap, industry);
-
+    addLine(dataArray) {
         this.linesData.push({
-            id: industry,
-            data: formatted
+            id: `line-${this.linesData.length}`,
+            data: this.#formatLine(dataArray)
         });
 
         this.render();
@@ -46,8 +44,8 @@ export default class LineChart {
 
         // LINE GENERATOR (updated each render)
         const lineGen = d3.line()
-            .x(d => this.#scaleX(d.k))
-            .y(d => this.#scaleY(d.v));
+            .x(d => this.#scaleX(d.x))
+            .y(d => this.#scaleY(d.y));
 
         // DRAW LINES
         this.chart.selectAll('.line-path')
@@ -75,35 +73,32 @@ export default class LineChart {
         this.render();
     }
 
+    onClick(callback) {
+        this.clickCallback = callback;
+    }
+
     #updateScales(allData) {
         this.chartWidth = this.width - this.margin[2] - this.margin[3];
         this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
         this.#scaleX = d3.scalePoint()
-            .domain([...new Set(allData.map(d => d.k))])
+            .domain([...new Set(allData.map(d => d.x))])
             .range([0, this.chartWidth]);
 
         this.#scaleY = d3.scaleLinear()
             .domain([
                 0,
-                d3.max(allData, d => d.v)
+                d3.max(allData, d => d.y)
             ])
             .range([this.chartHeight, 0]);
     }
 
-    #formatIndustryLine(dataMap, industry) {
-        return Array.from(dataMap.entries())
-            .sort((a, b) => a[0] - b[0]) // ensure years are ordered
-            .map(([year, arr]) => {
-                const record = arr[0]; // your array always has one object
-                return {
-                    k: +year,                 // x (year)
-                    v: record[industry] ?? 0 // y (value for that industry)
-                };
-            });
+    #formatLine(dataArray) {
+        return dataArray.map(d => ({
+            x: d.year,
+            y: d.value
+        }));
     }
-
-
 
     #resize() {
         const bounds = this.container.node().getBoundingClientRect();
@@ -127,4 +122,5 @@ export default class LineChart {
         this.axisY
             .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
     }
+
 }

@@ -46,7 +46,12 @@ export default class BarChart {
             .attr('y', d => this.#scaleY(d.k))
             .attr('width', d => this.#scaleX(d.v))
             .attr('height', this.#scaleY.bandwidth())
-            .attr('fill', d => this.#scaleColor(d.v));
+            .attr('fill', d => this.#scaleColor(d.v))
+            .on('click', (event, d) => {
+                if (this.clickCallback) {
+                    this.clickCallback(d);
+                }
+            });;
 
         let xAxis = d3.axisBottom(this.#scaleX),
             yAxis = d3.axisLeft(this.#scaleY);
@@ -76,6 +81,10 @@ export default class BarChart {
         this.fixedScaleEnabled = true;
         this.fixedMin = min;
         this.fixedMax = max;
+    }
+
+    onClick(callback) {
+        this.clickCallback = callback;
     }
 
     #updateScales(data) {

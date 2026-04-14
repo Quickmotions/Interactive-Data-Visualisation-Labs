@@ -11,10 +11,12 @@ export default class Dashboard {
         this.label = document.getElementById(options.labelId);
 
         // chart instances
-        this.yearChart = options.yearChart; // bar chart
+        this.yearChart = options.industriesChart; // bar chart
         this.yearChart.setFixedScales(0, 10); // easier to see changes when fixed
 
-        this.lineChart = options.lineChart;
+        this.industriesComparisionChart = options.industriesComparison;
+
+        this.sourcesLine = options.sourcesLine;
 
         this.sourcesChart = options.sourcesChart; // bubble chart
         this.sourcesChart.enableZoom();
@@ -30,10 +32,11 @@ export default class Dashboard {
         // state
         this.currentYear = options.initialYear;
         this.currentYearTable = this.industryYearsDirect;
+        this.currentIndustryTable = this.industryDirect;
 
         this.#bindEvents();
         this.render();
-        this.renderLine();
+        this.renderSourcesLine(true);
     }
 
     #bindEvents() {
@@ -46,16 +49,16 @@ export default class Dashboard {
         document.getElementById("changeYearTableDirect")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsDirect;
-                this.lineChart.clear();
-                this.renderLine()
+                this.currentIndustryTable = this.industryDirect;
+                this.renderSourcesLine()
                 this.render();
             });
 
         document.getElementById("changeYearTableReallocated")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsReallocated;
-                this.lineChart.clear();
-                this.renderLine();
+                this.currentIndustryTable = this.industryReallocated
+                this.renderSourcesLine();
                 this.render();
             });
 
@@ -63,6 +66,14 @@ export default class Dashboard {
             this.currentYear = +bubbleData.source;
             this.slider.value = this.currentYear;
             this.render();
+        });
+        this.yearChart.onClick(output => {
+            const directData = this.#getValueByKey(this.industryDirect, output.k);
+            const reallocatedData = this.#getValueByKey(this.industryReallocated, output.k);
+
+            this.industriesComparisionChart.clear();
+            this.industriesComparisionChart.addLine(directData);
+            this.industriesComparisionChart.addLine(reallocatedData);
         });
     }
 
@@ -72,25 +83,51 @@ export default class Dashboard {
         this.yearChart.render(this.#removeTotal(yearRecord));
         this.sourcesChart.render(this.#formatBubbleData(this.sourcesYear));
         this.donutChart.render(this.#formatDonutRecord(yearRecord));
+        this.industriesComparisionChart.render()
 
         if (this.label) {
             this.label.textContent = this.currentYear; // visual year indicator
         }
     }
-    renderLine() {
-        const firstEntry = this.currentYearTable.values().next().value[0];
+
+    renderSourcesLine(firstTime = false) {
+        if (!firstTime) this.sourcesLine.clear();
+
+        const firstEntry = this.currentIndustryTable[0];
         for (const key in firstEntry) {
             if (key === "Year" || key === "Total") continue;
 
-            this.lineChart.addLine(this.currentYearTable, key);
+            this.sourcesLine.addLine(
+                this.#getValueByKey(this.currentIndustryTable, key)
+            );
         }
     }
+
     #removeTotal(record) {
         return Object.fromEntries(
             Object.entries(record)
                 .filter(([key]) => key.toLowerCase() !== "total")
         );
     }
+
+    #getValueByYear(data, year, key) {
+        const entry = data.find(d => d.Year === year);
+        return entry ? entry[key] : undefined;
+    }
+
+    #getValueByKey(data, key) {
+
+        return data.map(d => ({
+            year: d.Year,
+            value: d[key]
+        }));
+    }
+
+    #getYearData(data, year) {
+        return data.find(d => d.Year === year);
+    }
+
+
 
     #formatBubbleData(dataset) {
         let bubbleAnalysis = [];

@@ -25,6 +25,17 @@
             <!-- Sidebar -->
             <aside class="sidebar">
                 <h5>Sidebar Menu</h5>
+                <div class="top-controls">
+                    <div class="box">
+                        <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
+                        <span id="yearLabel">2020</span>
+                    </div>
+
+                    <div class="box">
+                        <button id="changeYearTableDirect">Direct Usage</button>
+                        <button id="changeYearTableReallocated">Reallocated Usage</button>
+                    </div>
+                </div>
             </aside>
 
             <!-- Content -->
@@ -35,30 +46,12 @@
 
                     <!-- Left Panel -->
                     <div class="panel-left">
-
-                        <div class="top-controls">
-                            <div class="box">
-                                <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
-                                <span id="yearLabel">2020</span>
-                            </div>
-
-                            <div class="box">
-                                <button id="changeYearTableDirect">Direct Usage</button>
-                                <button id="changeYearTableReallocated">Reallocated Usage</button>
-                            </div>
-                        </div>
-
-                        <div class="bottom-grid">
-                            <div class="mini-box"></div>
-                            <div id="line1" class="viz"></div>
-                            <div class="mini-box"></div>
-                        </div>
-
+                        <div id="industries-graph" class="viz"></div>
                     </div>
 
                     <!-- Right Panel -->
                     <div class="panel-right">
-                        <div id="bar1" class="viz"></div>
+                        <div id="industries-comparision-graph" class="viz"></div>
                     </div>
 
                 </div>
@@ -68,6 +61,7 @@
 
                     <div class="bottom-left">
                         <div id="bubble1" class="viz"></div>
+                        <div id="sources-line" class="viz"></div>
                     </div>
 
                     <div class="bottom-right">

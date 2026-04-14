@@ -29,10 +29,11 @@ Promise.all([
         sources: sources,
         sliderId: "yearSlider",
         labelId: "yearLabel",
-        yearChart: new BarChart('div#bar1', [30, 40, 150, 10]),
+        industriesChart: new BarChart('div#industries-graph', [30, 40, 150, 10]),
+        industriesComparison: new LineChart('div#industries-comparision-graph', [30, 40, 40, 30]),
         sourcesChart: new BubbleChart('div#bubble1', [20, 45, 60, 20]),
         donutChart: new DonutChart('div#donut1', [20, 20, 20, 20]),
-        lineChart: new LineChart('div#line1', [30, 40, 20, 30]),
+        sourcesLine: new LineChart('div#sources-line', [30, 40, 20, 30]),
         initialYear: 2023
     });
 
