@@ -25,6 +25,23 @@ export default class LineChart {
         this.line = d3.line()
             .x(d => this.#scaleX(d.x))
             .y(d => this.#scaleY(d.y));
+
+        // comparision Hover
+        this.hoverGroup = this.chart.append('g')
+            .style('display', 'none');
+
+        this.hoverLine = this.hoverGroup.append('line')
+            .attr('stroke', 'grey')
+            .attr('stroke-dasharray', '4');
+
+        this.diffLine = this.hoverGroup.append('line')
+            .attr('stroke', 'red')
+            .attr('stroke-width', 2);
+
+        this.diffLabel = this.hoverGroup.append('text')
+            .attr('fill', 'red')
+            .attr('font-size', 12)
+            .attr('text-anchor', 'start');
     }
 
     addLine(dataArray) {
@@ -56,6 +73,18 @@ export default class LineChart {
             .attr('stroke', d => this.color(d.id))
             .attr('stroke-width', 2)
             .attr('d', d => lineGen(d.data));
+
+        this.chart.selectAll('.overlay')
+            .data([null])
+            .join('rect')
+            .attr('class', 'overlay')
+            .attr('width', this.chartWidth)
+            .attr('height', this.chartHeight)
+            .attr('fill', 'transparent')
+            .on('mousemove', (event) => this.#handleHover(event))
+            .on('mouseleave', () => {
+                this.hoverGroup.style('display', 'none');
+            });
 
         this.axisX.call(d3.axisBottom(this.#scaleX));
         this.axisY.call(d3.axisLeft(this.#scaleY));
@@ -120,7 +149,79 @@ export default class LineChart {
             .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`);
 
         this.axisY
-            .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
+            .attr('transform', `translate(${this.margin[3]}, ${this.margin[0]})`);
     }
 
+    #handleHover(event) {
+        const [mx] = d3.pointer(event);
+
+        const xDomain = this.#scaleX.domain();
+
+        // cancel pop up if lines empty
+        if (!xDomain || xDomain.length === 0) return;
+
+        // Find nearest x value
+        const nearestX = xDomain.reduce((a, b) => {
+            return Math.abs(this.#scaleX(a) - mx) <
+                Math.abs(this.#scaleX(b) - mx) ? a : b;
+        });
+
+        // Get y values for each line at this x
+        const points = this.linesData.map(line => {
+            const point = line.data.find(d => d.x === nearestX);
+            if (!point) return null;
+
+            return {
+                id: line.id,
+                x: nearestX,
+                y: point.y
+            };
+        }).filter(Boolean);
+
+        if (points.length < 2) return;
+
+        // Sort by y value
+        points.sort((a, b) => a.y - b.y);
+
+        // Find closest pair
+        let minDiff = Infinity;
+        let pair = null;
+
+        for (let i = 0; i < points.length - 1; i++) {
+            const diff = Math.abs(points[i].y - points[i + 1].y);
+            if (diff < minDiff) {
+                minDiff = diff;
+                pair = [points[i], points[i + 1]];
+            }
+        }
+
+        if (!pair) return;
+
+        const xPos = this.#scaleX(nearestX);
+        const y1 = this.#scaleY(pair[0].y);
+        const y2 = this.#scaleY(pair[1].y);
+
+        // Show hover visuals
+        this.hoverGroup.style('display', null);
+
+        // Vertical guide line
+        this.hoverLine
+            .attr('x1', xPos)
+            .attr('x2', xPos)
+            .attr('y1', 0)
+            .attr('y2', this.chartHeight);
+
+        // Difference line
+        this.diffLine
+            .attr('x1', xPos)
+            .attr('x2', xPos)
+            .attr('y1', y1)
+            .attr('y2', y2);
+
+        // Label
+        this.diffLabel
+            .attr('x', xPos + 5)
+            .attr('y', (y1 + y2) / 2)
+            .text(`${minDiff.toFixed(2)} MToE`);
+    }
 }

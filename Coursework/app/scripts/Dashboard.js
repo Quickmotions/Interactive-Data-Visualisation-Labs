@@ -12,16 +12,18 @@ export default class Dashboard {
 
         // chart instances
         this.yearChart = options.industriesChart; // bar chart
-        this.yearChart.setFixedScales(0, 10); // easier to see changes when fixed
+        this.yearChart.setFixedScales(0, 8); // easier to see changes when fixed
 
         this.industriesComparisionChart = options.industriesComparison;
+        this.sourcesLineChart = options.sourcesLine;
 
-        this.sourcesLine = options.sourcesLine;
-
-        this.sourcesChart = options.sourcesChart; // bubble chart
-        this.sourcesChart.enableZoom();
-
+        this.sourcesBubbleChart = options.sourcesBubble;
+        this.sourcesBubbleChart.enableZoom();
         this.donutChart = options.donutChart;
+
+        this.renewableDemandChart = options.renewableDemandLine;
+
+        this.industryUsageChart = options.stackedIndustries;
 
         // preprocess data
         this.industryYearsDirect = d3.group(this.industryDirect, d => d.Year);
@@ -36,36 +38,33 @@ export default class Dashboard {
 
         this.#bindEvents();
         this.render();
-        this.renderSourcesLine(true);
     }
 
     #bindEvents() {
 
         this.slider.addEventListener("input", () => {
             this.currentYear = +this.slider.value;
-            this.render();
+            this.update();
         });
 
         document.getElementById("changeYearTableDirect")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsDirect;
                 this.currentIndustryTable = this.industryDirect;
-                this.renderSourcesLine()
-                this.render();
+                this.update();
             });
 
         document.getElementById("changeYearTableReallocated")
             ?.addEventListener("click", () => {
                 this.currentYearTable = this.industryYearsReallocated;
                 this.currentIndustryTable = this.industryReallocated
-                this.renderSourcesLine();
-                this.render();
+                this.update();
             });
 
-        this.sourcesChart.onClick(bubbleData => {
+        this.sourcesBubbleChart.onClick(bubbleData => {
             this.currentYear = +bubbleData.source;
             this.slider.value = this.currentYear;
-            this.render();
+            this.update();
         });
         this.yearChart.onClick(output => {
             const directData = this.#getValueByKey(this.industryDirect, output.k);
@@ -78,26 +77,38 @@ export default class Dashboard {
     }
 
     render() {
+
+
+        this.renewableDemandChart.clear()
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "EnergyFromRenewableWasteSources"));
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "TotalEnergyConsumptionPrimaryFuels"));
+        this.#renderIndustryUsageStackedChart();
+
+        this.update()
+
+    }
+
+    update() {
         let yearRecord = this.currentYearTable.get(this.currentYear)?.[0];
 
         this.yearChart.render(this.#removeTotal(yearRecord));
-        this.sourcesChart.render(this.#formatBubbleData(this.sourcesYear));
+        this.sourcesBubbleChart.render(this.#formatBubbleData(this.sourcesYear));
         this.donutChart.render(this.#formatDonutRecord(yearRecord));
         this.industriesComparisionChart.render()
+        this.#rendersourcesLineChart();
 
         if (this.label) {
             this.label.textContent = this.currentYear; // visual year indicator
         }
     }
 
-    renderSourcesLine(firstTime = false) {
-        if (!firstTime) this.sourcesLine.clear();
+    #rendersourcesLineChart() {
+        this.sourcesLineChart.clear();
 
         const firstEntry = this.currentIndustryTable[0];
         for (const key in firstEntry) {
             if (key === "Year" || key === "Total") continue;
-
-            this.sourcesLine.addLine(
+            this.sourcesLineChart.addLine(
                 this.#getValueByKey(this.currentIndustryTable, key)
             );
         }
@@ -126,8 +137,6 @@ export default class Dashboard {
     #getYearData(data, year) {
         return data.find(d => d.Year === year);
     }
-
-
 
     #formatBubbleData(dataset) {
         let bubbleAnalysis = [];
@@ -180,5 +189,21 @@ export default class Dashboard {
             donutAnalysis["Other"] = otherSum;
         }
         return donutAnalysis;
+    }
+
+    #renderIndustryUsageStackedChart() {
+        this.industryUsageChart.clear();
+
+        const industries = Object.keys(this.currentIndustryTable[0])
+            .filter(key => key !== 'Year' && key !== 'Total');
+
+        industries.forEach(industry => {
+            const series = this.currentIndustryTable.map(d => ({
+                year: d.Year,
+                value: d[industry]
+            }));
+
+            this.industryUsageChart.addSeries(series);
+        });
     }
 }
