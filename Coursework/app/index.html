@@ -16,7 +16,8 @@
 
         <!-- Top Bar -->
         <header class="topbar">
-            Dashboard Prototype
+            Is The UK's Increase in Renewable Energy Sufficient in Reducing Reliance On Non-Renewable Energy In Major
+            Industries
         </header>
 
         <!-- Main Layout -->
@@ -28,10 +29,7 @@
                 <div class="top-controls">
                     <div class="box">
                         <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
-                        <span id="yearLabel">2020</span>
-                    </div>
-
-                    <div class="box">
+                        <h3 id="yearLabel">2020</h3>
                         <button id="changeYearTableDirect">Direct Usage</button>
                         <button id="changeYearTableReallocated">Reallocated Usage</button>
                     </div>
@@ -46,12 +44,19 @@
 
                     <!-- Left Panel -->
                     <div class="panel-left">
-                        <div id="industries-graph" class="viz"></div>
+                        UK Industry Energy Usage
+                        <div id="industries-graph" class="vis"></div>
+                    </div>
+
+                    <div class="panel-middle">
+                        Direct and Reallocated Use
+                        <div id="industries-comparision-graph" class="vis"></div>
                     </div>
 
                     <!-- Right Panel -->
                     <div class="panel-right">
-                        <div id="industries-comparision-graph" class="viz"></div>
+                        Major Industries
+                        <div id="donut1" class="vis"></div>
                     </div>
 
                 </div>
@@ -60,14 +65,18 @@
                 <div class="bottom-section">
 
                     <div class="bottom-left">
-                        <div id="demand-graph" class="viz"></div>
-                        <div id="industry-stack-graph" class="viz"></div>
-                        <div id="bubble1" class="viz"></div>
-                        <div id="sources-line" class="viz"></div>
+                        Renewable Energy Sources
+                        <div id="sources-stack-graph" class="vis"></div>
                     </div>
 
+                    <div class="bottom-middle">
+                        Renewable Share
+                        <div id="bubble1" class="vis"></div>
+                    </div>
                     <div class="bottom-right">
-                        <div id="donut1" class="viz"></div>
+                        Energy Demand
+                        <div id="demand-graph" class="vis"></div>
+
                     </div>
 
                 </div>

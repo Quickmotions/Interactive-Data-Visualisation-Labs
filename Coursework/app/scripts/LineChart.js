@@ -42,11 +42,13 @@ export default class LineChart {
             .attr('fill', 'red')
             .attr('font-size', 12)
             .attr('text-anchor', 'start');
+
     }
 
-    addLine(dataArray) {
+    addLine(dataArray, labelText = "") {
         this.linesData.push({
             id: `line-${this.linesData.length}`,
+            label: labelText,
             data: this.#formatLine(dataArray)
         });
 
@@ -59,12 +61,12 @@ export default class LineChart {
         const allData = this.linesData.flatMap(d => d.data);
         this.#updateScales(allData);
 
-        // LINE GENERATOR (updated each render)
+        // Line generator
         const lineGen = d3.line()
             .x(d => this.#scaleX(d.x))
             .y(d => this.#scaleY(d.y));
 
-        // DRAW LINES
+        // line renderer
         this.chart.selectAll('.line-path')
             .data(this.linesData, d => d.id)
             .join('path')
@@ -74,6 +76,7 @@ export default class LineChart {
             .attr('stroke-width', 2)
             .attr('d', d => lineGen(d.data));
 
+        // Hover Overlay
         this.chart.selectAll('.overlay')
             .data([null])
             .join('rect')
@@ -86,8 +89,38 @@ export default class LineChart {
                 this.hoverGroup.style('display', 'none');
             });
 
-        this.axisX.call(d3.axisBottom(this.#scaleX));
-        this.axisY.call(d3.axisLeft(this.#scaleY));
+        // Line Labels
+        let order = -40
+        this.chart.selectAll('.line-label')
+            .data(this.linesData, d => d.id)
+            .join('text')
+            .attr('class', 'line-label')
+            .attr('x', 10)
+            .attr('y', d => {
+                order += 20;
+                return order;
+            })
+            .attr('fill', d => this.color(d.id))
+            .attr('font-size', 12)
+            .attr('alignment-baseline', 'middle')
+            .text(d => d.label || d.id);
+
+        // x axis spacing
+        let ticks = this.#scaleX.domain();
+        if (this.xTickInterval) {
+            ticks = ticks.filter((d, i) => i % this.xTickInterval === 0);
+        }
+        this.axisX.call(
+            d3.axisBottom(this.#scaleX)
+                .tickValues(ticks)
+
+        );
+        // y axis spacing
+        let yAxis = d3.axisLeft(this.#scaleY);
+        if (this.yTickInterval) {
+            yAxis = yAxis.ticks(this.yTickInterval);
+        }
+        this.axisY.call(yAxis);
     }
 
     enableAutoResize(data) {
@@ -104,6 +137,37 @@ export default class LineChart {
 
     onClick(callback) {
         this.clickCallback = callback;
+    }
+
+    addXLabel(labelText) {
+        this.svg.selectAll('.x-axis-label').data([null]).join('text')
+            .attr('class', 'x-axis-label')
+            .attr('x', this.margin[2] + this.chartWidth / 2)
+            .attr('y', this.height - 10)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '12px')
+            .text(labelText);
+    }
+
+
+    addYLabel(labelText) {
+        this.svg.selectAll('.y-axis-label').data([null]).join('text')
+            .attr('class', 'y-axis-label')
+            .attr("transform", "rotate(-90)") // Rotate -90 degrees
+            .attr('x', 0 - labelText.length * 6)
+            .attr('y', 10)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '12px')
+            .text(labelText);
+    }
+
+    setXAxisTickInterval(step = 5) {
+        this.xTickInterval = step;
+        this.render();
+    }
+    setYAxisTickInterval(step = 5) {
+        this.yTickInterval = step;
+        this.render();
     }
 
     #updateScales(allData) {
@@ -222,6 +286,6 @@ export default class LineChart {
         this.diffLabel
             .attr('x', xPos + 5)
             .attr('y', (y1 + y2) / 2)
-            .text(`${minDiff.toFixed(2)} MToE`);
+            .text(`${minDiff.toFixed(1)} MToE`);
     }
 }

@@ -44,7 +44,18 @@ export default class DonutChart {
             .attr('fill', d => this.#scaleArc(d.data.v))
             .attr('stroke', '#fff')
             .attr('stroke-width', 2)
-            .attr('d', this.#arcGen);
+            .attr('d', this.#arcGen)
+            .style('cursor', 'pointer')
+            .on('mouseover', (event, d) => {
+                if (this.hoverCallback) {
+                    this.hoverCallback(d.data.k);
+                }
+            })
+            .on('mouseout', () => {
+                if (this.hoverOutCallback) {
+                    this.hoverOutCallback();
+                }
+            });
 
         // Labels
         this.chart
@@ -88,6 +99,14 @@ export default class DonutChart {
             .attr('transform',
                 `translate(${this.margin[2] + chartWidth / 2},
                            ${this.margin[0] + chartHeight / 2})`);
+    }
+
+    onHover(callback) {
+        this.hoverCallback = callback;
+    }
+
+    onHoverOut(callback) {
+        this.hoverOutCallback = callback;
     }
 
     // adapter for new input into older graph from lab 

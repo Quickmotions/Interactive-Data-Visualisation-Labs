@@ -13,7 +13,6 @@ export default class BubbleChart {
         this.margin = margin;
 
         // flags
-        this.behaviour = false;
         this.clickCallback = null;
 
         // Append the SVG element
@@ -30,6 +29,7 @@ export default class BubbleChart {
     }
 
     render(data) {
+        console.log(data);
         this.#resize();
         this.#updateScales(data);
 
@@ -41,24 +41,7 @@ export default class BubbleChart {
             .attr('cx', d => this.#scaleX(d.x))
             .attr('cy', d => this.#scaleY(d.y))
             .attr('r', d => this.#scaleR(d.size))
-            .attr('fill', d => this.#scaleColor(d.size))
-            .on('mouseover', (event, d) => {
-                this.bubbleGroup
-                    .selectAll('text')
-                    .filter(t => t.source === d.source)
-                    .style('opacity', 1);
-            })
-            .on('mouseout', (event, d) => {
-                this.bubbleGroup
-                    .selectAll('text')
-                    .filter(t => t.source === d.source)
-                    .style('opacity', 0);
-            })
-            .on('click', (event, d) => {
-                if (this.clickCallback) {
-                    this.clickCallback(d);
-                }
-            });
+            .attr('fill', d => this.#scaleColor(d.size));
 
         // Label
         this.bubbleGroup
@@ -71,12 +54,15 @@ export default class BubbleChart {
             .attr('dy', '0.35em')
             .style('font-size', '10px')
             .style('pointer-events', 'none')
-            .style('opacity', 0)
             .text(d => d.source);
 
+        const sourceLabelMap = new Map(data.map(d => [d.x, d.source]));
+
         // Axes
-        let xAxis = d3.axisBottom(this.#scaleX),
-            yAxis = d3.axisLeft(this.#scaleY).tickFormat(d3.format(".0%"));
+        let xAxis = d3.axisBottom(this.#scaleX)
+            .tickValues(data.map(d => d.x))
+            .tickFormat(value => sourceLabelMap.get(value) || value);
+        let yAxis = d3.axisLeft(this.#scaleY).tickFormat(d3.format(".2%"));
         this.axisX.call(xAxis);
         this.axisY.call(yAxis);
 
@@ -87,7 +73,7 @@ export default class BubbleChart {
             .attr('y', this.height - 10)
             .attr('text-anchor', 'middle')
             .style('font-size', '12px')
-            .text('Renewable energy contribution (Mtoe)');
+            .text('Renewable source category');
 
         this.svg.selectAll('.y-axis-label').data([null]).join('text')
             .attr('class', 'y-axis-label')
@@ -96,7 +82,7 @@ export default class BubbleChart {
             )
             .attr('text-anchor', 'middle')
             .style('font-size', '12px')
-            .text('% Renewables');
+            .text('Share of total renewable energy');
 
     }
 
@@ -106,7 +92,7 @@ export default class BubbleChart {
         this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
         let maxValue = d3.max(data, d => d.size);
-        let maxR = Math.min(this.chartWidth, this.chartHeight) / this.height * 16;
+        let maxR = Math.min(this.chartWidth, this.chartHeight) / this.height * 32; // hard coded value to change bubble max size
 
         this.#scaleX = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.x)])
@@ -132,10 +118,6 @@ export default class BubbleChart {
         observer.observe(this.container.node());
     }
 
-    onClick(callback) {
-        this.clickCallback = callback;
-    }
-
     #resize() {
         const bounds = this.container.node().getBoundingClientRect();
 
@@ -157,35 +139,6 @@ export default class BubbleChart {
 
         this.axisY
             .attr('transform', `translate(${this.margin[2]}, ${this.margin[0]})`);
-    }
-
-    // zoom behaviour
-    #setZoom() {
-        const zoom = d3.zoom()
-            .scaleExtent([1, 5])
-            .on('zoom', ({ transform }) => {
-
-                // rescaled axes
-                const newX = transform.rescaleX(this.#scaleX);
-                const newY = transform.rescaleY(this.#scaleY);
-
-                // scale bubbles
-                this.bubbleGroup.attr('transform', transform);
-
-                // update axes
-                this.axisX.call(d3.axisBottom(newX));
-                this.axisY.call(d3.axisLeft(newY).tickFormat(d3.format(".0%")));
-            });
-
-        this.svg.call(zoom);
-    }
-
-    // enable behaviours only if no other behaviour is active
-    enableZoom() {
-        if (!this.behaviour) {
-            this.behaviour = true;
-            this.#setZoom();
-        }
     }
 
 }

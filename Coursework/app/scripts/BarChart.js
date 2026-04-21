@@ -34,7 +34,8 @@ export default class BarChart {
     }
 
     render(data) {
-        data = this.#formatData(data)
+        this.currentData = data;
+        data = this.#formatData(data);
         this.#resize();
         this.#updateScales(data);
 
@@ -47,11 +48,15 @@ export default class BarChart {
             .attr('width', d => this.#scaleX(d.v))
             .attr('height', this.#scaleY.bandwidth())
             .attr('fill', d => this.#scaleColor(d.v))
+            .attr('stroke', d => d.k === this.highlightedKey ? '#000000' : 'none')
+            .attr('stroke-width', d => d.k === this.highlightedKey ? 3 : 0)
+            .classed('highlighted', d => d.k === this.highlightedKey)
+            .style('cursor', 'pointer')
             .on('click', (event, d) => {
                 if (this.clickCallback) {
                     this.clickCallback(d);
                 }
-            });;
+            });
 
         let xAxis = d3.axisBottom(this.#scaleX),
             yAxis = d3.axisLeft(this.#scaleY);
@@ -66,7 +71,7 @@ export default class BarChart {
             .attr('y', this.height - 10)
             .attr('text-anchor', 'middle')
             .style('font-size', '12px')
-            .text('Total energy usage (Mtoe)');
+            .text('Million Tonnes of Oil Energy Equivalent');
     }
 
     enableAutoResize(data) {
@@ -85,6 +90,16 @@ export default class BarChart {
 
     onClick(callback) {
         this.clickCallback = callback;
+    }
+
+    highlightBar(key) {
+        this.highlightedKey = key;
+        this.render(this.currentData || []);
+    }
+
+    clearHighlight() {
+        this.highlightedKey = null;
+        this.render(this.currentData || []);
     }
 
     #updateScales(data) {

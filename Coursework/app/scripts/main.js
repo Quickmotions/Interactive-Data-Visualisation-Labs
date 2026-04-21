@@ -30,13 +30,12 @@ Promise.all([
         sources: sources,
         sliderId: "yearSlider",
         labelId: "yearLabel",
-        industriesChart: new BarChart('div#industries-graph', [30, 40, 150, 10]),
-        industriesComparison: new LineChart('div#industries-comparision-graph', [30, 40, 40, 30]),
-        sourcesBubble: new BubbleChart('div#bubble1', [20, 45, 60, 20]),
-        donutChart: new DonutChart('div#donut1', [20, 20, 20, 20]),
-        sourcesLine: new LineChart('div#sources-line', [30, 40, 20, 30]),
-        renewableDemandLine: new LineChart('div#demand-graph', [40, 40, 40, 40]),
-        stackedIndustries: new StackedAreaChart('div#industry-stack-graph', [30, 30, 30, 30]),
+        industriesChart: new BarChart('div#industries-graph', [30, 50, 150, 10]),
+        industriesComparison: new LineChart('div#industries-comparision-graph', [40, 45, 40, 40]),
+        sourcesBubble: new BubbleChart('div#bubble1', [30, 50, 60, 30]),
+        donutChart: new DonutChart('div#donut1', [0, 0, 0, 0]),
+        renewableDemandLine: new LineChart('div#demand-graph', [40, 45, 40, 40]),
+        stackedSources: new StackedAreaChart('div#sources-stack-graph', [30, 45, 40, 30]),
         initialYear: 2023
     });
 

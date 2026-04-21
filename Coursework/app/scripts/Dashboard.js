@@ -18,12 +18,11 @@ export default class Dashboard {
         this.sourcesLineChart = options.sourcesLine;
 
         this.sourcesBubbleChart = options.sourcesBubble;
-        this.sourcesBubbleChart.enableZoom();
         this.donutChart = options.donutChart;
 
         this.renewableDemandChart = options.renewableDemandLine;
 
-        this.industryUsageChart = options.stackedIndustries;
+        this.renewableEnergyStackedChart = options.stackedSources;
 
         // preprocess data
         this.industryYearsDirect = d3.group(this.industryDirect, d => d.Year);
@@ -60,29 +59,36 @@ export default class Dashboard {
                 this.currentIndustryTable = this.industryReallocated
                 this.update();
             });
-
-        this.sourcesBubbleChart.onClick(bubbleData => {
-            this.currentYear = +bubbleData.source;
-            this.slider.value = this.currentYear;
-            this.update();
+        this.donutChart.onHover(attributeName => {
+            this.yearChart.highlightBar(attributeName);
         });
+
+        this.donutChart.onHoverOut(() => {
+            this.yearChart.clearHighlight();
+        });
+
         this.yearChart.onClick(output => {
             const directData = this.#getValueByKey(this.industryDirect, output.k);
             const reallocatedData = this.#getValueByKey(this.industryReallocated, output.k);
 
             this.industriesComparisionChart.clear();
-            this.industriesComparisionChart.addLine(directData);
-            this.industriesComparisionChart.addLine(reallocatedData);
+            this.industriesComparisionChart.addLine(directData, `Direct ${output.k}`);
+            this.industriesComparisionChart.addLine(reallocatedData, `Reallocated ${output.k}`);
         });
     }
 
     render() {
-
+        this.industriesComparisionChart.setXAxisTickInterval(3);
 
         this.renewableDemandChart.clear()
-        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "EnergyFromRenewableWasteSources"));
-        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "TotalEnergyConsumptionPrimaryFuels"));
-        this.#renderIndustryUsageStackedChart();
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "TotalEnergyConsumptionPrimaryFuels"), "Total Energy Consumption");
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "EnergyFromRenewableWasteSources"), "Renewable Energy");
+        this.renewableDemandChart.addYLabel("Million Tonnes of Oil Equivalent");
+        this.renewableDemandChart.setXAxisTickInterval(3);
+        this.industriesComparisionChart.addYLabel("Million Tonnes of Oil Equivalent");
+
+
+        this.#renderRenewablesStackedChart();
 
         this.update()
 
@@ -92,25 +98,13 @@ export default class Dashboard {
         let yearRecord = this.currentYearTable.get(this.currentYear)?.[0];
 
         this.yearChart.render(this.#removeTotal(yearRecord));
-        this.sourcesBubbleChart.render(this.#formatBubbleData(this.sourcesYear));
         this.donutChart.render(this.#formatDonutRecord(yearRecord));
+        this.#renderBubbleChart();
+
         this.industriesComparisionChart.render()
-        this.#rendersourcesLineChart();
 
         if (this.label) {
             this.label.textContent = this.currentYear; // visual year indicator
-        }
-    }
-
-    #rendersourcesLineChart() {
-        this.sourcesLineChart.clear();
-
-        const firstEntry = this.currentIndustryTable[0];
-        for (const key in firstEntry) {
-            if (key === "Year" || key === "Total") continue;
-            this.sourcesLineChart.addLine(
-                this.#getValueByKey(this.currentIndustryTable, key)
-            );
         }
     }
 
@@ -121,43 +115,12 @@ export default class Dashboard {
         );
     }
 
-    #getValueByYear(data, year, key) {
-        const entry = data.find(d => d.Year === year);
-        return entry ? entry[key] : undefined;
-    }
-
     #getValueByKey(data, key) {
 
         return data.map(d => ({
             year: d.Year,
             value: d[key]
         }));
-    }
-
-    #getYearData(data, year) {
-        return data.find(d => d.Year === year);
-    }
-
-    #formatBubbleData(dataset) {
-        let bubbleAnalysis = [];
-
-        const years = Array.from(dataset.keys()).sort();
-
-        years.forEach((year, index) => {
-            const yearArray = dataset.get(year);
-            if (!yearArray?.length) return;
-
-            const data = yearArray[0];
-
-            bubbleAnalysis.push({
-                source: year,
-                x: index,
-                y: data.PercentageFromRenewableSources,
-                size: data.TotalEnergyConsumptionPrimaryFuels
-            });
-        });
-
-        return bubbleAnalysis;
     }
 
     #formatDonutRecord(record) {
@@ -176,9 +139,9 @@ export default class Dashboard {
 
         entries = d3.sort(entries, d => -d.value);
 
-        // split top 3 industries and other
-        const topEntries = entries.slice(0, 3);
-        const otherEntries = entries.slice(3);
+        // split top 4 industries and other
+        const topEntries = entries.slice(0, 4);
+        const otherEntries = entries.slice(4);
         const otherSum = d3.sum(otherEntries, d => d.value);
 
         const donutAnalysis = {};
@@ -191,19 +154,105 @@ export default class Dashboard {
         return donutAnalysis;
     }
 
-    #renderIndustryUsageStackedChart() {
-        this.industryUsageChart.clear();
+    #renderBubbleChart() {
+        const sourcesRecord = this.sourcesYear.get(this.currentYear)?.[0];
+        if (!sourcesRecord) return;
 
-        const industries = Object.keys(this.currentIndustryTable[0])
-            .filter(key => key !== 'Year' && key !== 'Total');
+        const categories = [
+            {
+                name: "Non-Combustible",
+                fields: [
+                    "HydroelectricPower",
+                    "WindWaveTidal",
+                    "SolarPhotovoltaic",
+                    "GeothermalAquifers"
+                ]
+            },
+            {
+                name: "Biomass",
+                fields: [
+                    "AnimalBiomass",
+                    "PlantBiomass",
+                    "Straw"
+                ]
+            },
+            {
+                name: "Wood Fuel",
+                fields: [
+                    "Wood",
+                    "WoodDry",
+                    "WoodSeasoned",
+                    "WoodWet",
+                    "Coffeelogs",
+                    "Woodchip",
+                    "WoodPellets",
+                    "WoodBriquettes",
+                    "Charcoal"
+                ]
+            },
+            {
+                name: "Biogas",
+                fields: [
+                    "LandfillGas",
+                    "SewageGas",
+                    "Biogas"
+                ]
+            },
+            {
+                name: "Liquid Biofuel",
+                fields: [
+                    "LiquidBiofuels",
+                    "Bioethanol",
+                    "Biodiesel",
+                    "SustainableAviationFuel"
+                ]
+            },
+            {
+                name: "Waste Fuel",
+                fields: [
+                    "MunicipalSolidWaste",
+                    "NonMunicipalSolidWaste"
+                ]
+            }
+        ];
+
+        const totalEnergy = sourcesRecord.TotalEnergyConsumptionPrimaryFuels ||
+            d3.sum(Object.values(sourcesRecord).filter(value => typeof value === 'number'));
+
+        const bubbleData = categories.map((category, index) => {
+            const value = d3.sum(category.fields, field => sourcesRecord[field] || 0);
+            return {
+                source: category.name,
+                x: index + 1,
+                y: totalEnergy ? value / totalEnergy : 0,
+                size: value
+            };
+        });
+
+        this.sourcesBubbleChart.render(bubbleData);
+    }
+
+    #renderRenewablesStackedChart() {
+        this.renewableEnergyStackedChart.clear();
+
+        const industries = Object.keys(this.sources[0])
+            .filter(key => key !== 'Year' &&
+                key !== 'Total' &&
+                key !== 'TotalEnergyConsumptionPrimaryFuels' &&
+                key !== 'EnergyFromRenewableWasteSources' &&
+                key !== 'PercentageFromRenewableSources');
 
         industries.forEach(industry => {
-            const series = this.currentIndustryTable.map(d => ({
+            const newArea = this.sources.map(d => ({
                 year: d.Year,
                 value: d[industry]
             }));
 
-            this.industryUsageChart.addSeries(series);
+            this.renewableEnergyStackedChart.addArea(newArea, industry);
         });
+        this.renewableEnergyStackedChart.setXAxisTickInterval(5);
+        this.renewableEnergyStackedChart.addYLabel("Million Tonnes of Oil Equivalent")
+        this.renewableEnergyStackedChart.addMouseOverTooltip();
+        this.renewableEnergyStackedChart.enableZoom();
     }
 }
