@@ -81,15 +81,13 @@ export default class Dashboard {
         this.industriesComparisionChart.setXAxisTickInterval(3);
 
         this.renewableDemandChart.clear()
-        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "TotalEnergyConsumptionPrimaryFuels"), "Total Energy Consumption");
-        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "EnergyFromRenewableWasteSources"), "Renewable Energy");
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "TotalEnergyConsumptionPrimaryFuels"), "Nonrenewable Energy Use");
+        this.renewableDemandChart.addLine(this.#getValueByKey(this.sources, "EnergyFromRenewableWasteSources"), "Renewable Energy Generation");
         this.renewableDemandChart.addYLabel("Million Tonnes of Oil Equivalent");
         this.renewableDemandChart.setXAxisTickInterval(3);
         this.industriesComparisionChart.addYLabel("Million Tonnes of Oil Equivalent");
 
-
         this.#renderRenewablesStackedChart();
-
         this.update()
 
     }
