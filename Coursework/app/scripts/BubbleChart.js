@@ -29,7 +29,6 @@ export default class BubbleChart {
     }
 
     render(data) {
-        console.log(data);
         this.#resize();
         this.#updateScales(data);
 

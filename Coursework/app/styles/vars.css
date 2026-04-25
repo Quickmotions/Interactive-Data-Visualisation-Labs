@@ -1,8 +1,20 @@
-/* Colour Palette */
+/* Colour Palette and Tools */
 :root {
-    --bg-main: #e6edfa;
+    --bg-main: #e6e8eb;
     --bg-panel: #ffffff;
+    --bg-soft: #f9fcfd;
+
     --primary: #4f6df5;
-    --border: #e2e8f0;
+    --primary-dark: #3b55d1;
+    --primary-light: #eef2ff;
+
+    --border: #e6eaf2;
     --text: #1f2937;
+    --text-muted: #6b7280;
+
+    --radius: 14px;
+    --radius-sm: 10px;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.06);
 }

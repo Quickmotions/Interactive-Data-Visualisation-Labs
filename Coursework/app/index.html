@@ -24,14 +24,31 @@
         <div class="main">
 
             <!-- Sidebar -->
-            <aside class="sidebar">
-                <h5>Sidebar Menu</h5>
+            <aside class="sidebar box">
                 <div class="top-controls">
                     <div class="box">
-                        <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
-                        <h3 id="yearLabel">2020</h3>
                         <button id="changeYearTableDirect">Direct Usage</button>
                         <button id="changeYearTableReallocated">Reallocated Usage</button>
+                    </div>
+                </div>
+                <div class="statistics box">
+                    <input id="yearSlider" type="range" min="1990" max="2023" step="1" value="2023">
+                    <h3 id="yearLabel">2020</h3>
+                    <div class="box">
+                        <h4 style="text-align: left;">Renewable Percentage</h4>
+                        <h3 id="renewablePercent">12.3%</h3>
+                    </div>
+                    <div class="box">
+                        <h4 style="text-align: left;">Renewable Change</h4>
+                        <h3 id="renewableChange">-2.3%</h3>
+                    </div>
+                    <div class="box">
+                        <h4 style="text-align: left;">Total Energy Use</h4>
+                        <h3 id="energyUseTotal">-2.3%</h3>
+                    </div>
+                    <div class="box">
+                        <h4 style="text-align: left;">Energy Useg Change</h4>
+                        <h3 id="energyDemandChange">+43.2</h3>
                     </div>
                 </div>
             </aside>
@@ -76,7 +93,6 @@
                     <div class="bottom-right">
                         Energy Demand
                         <div id="demand-graph" class="vis"></div>
-
                     </div>
 
                 </div>

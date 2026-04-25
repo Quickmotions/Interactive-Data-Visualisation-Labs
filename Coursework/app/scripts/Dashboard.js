@@ -101,6 +101,8 @@ export default class Dashboard {
 
         this.industriesComparisionChart.render()
 
+        this.#updateSummaryText(yearRecord);
+
         if (this.label) {
             this.label.textContent = this.currentYear; // visual year indicator
         }
@@ -120,6 +122,12 @@ export default class Dashboard {
             value: d[key]
         }));
     }
+
+    #getValueByYearKey(data, year, key) {
+        const record = data.find(d => d.Year === year);
+        return record ? record[key] : undefined;
+    }
+
 
     #formatDonutRecord(record) {
         const excludedKeys = new Set([
@@ -253,4 +261,34 @@ export default class Dashboard {
         this.renewableEnergyStackedChart.addMouseOverTooltip();
         this.renewableEnergyStackedChart.enableZoom();
     }
+
+    #updateSummaryText() {
+        const prevYearRecord = this.sourcesYear.get(this.currentYear - 1)?.[0];
+
+        // --- Renewable % ---
+        const renewablePercent = this.#getValueByYearKey(this.sources, this.currentYear, "PercentageFromRenewableSources") * 100;
+        const renewablePercentChange = renewablePercent - this.#getValueByYearKey(this.sources, this.currentYear - 1, "PercentageFromRenewableSources") * 100;
+
+        // // --- Total energy use ---
+        const totalEnergy = this.#getValueByYearKey(this.sources, this.currentYear, "TotalEnergyConsumptionPrimaryFuels");
+        const totalEnergyLast = this.#getValueByYearKey(this.sources, this.currentYear - 1, "TotalEnergyConsumptionPrimaryFuels");
+        const totalEnergyChange = ((totalEnergy - totalEnergyLast) / totalEnergyLast) * 100;
+        // --- Update DOM ---
+        document.getElementById("renewablePercent").textContent =
+            `${renewablePercent.toFixed(1)}%`;
+
+        const rc = document.getElementById("renewableChange");
+        rc.textContent =
+            `${renewablePercentChange >= 0 ? "+" : ""}${renewablePercentChange.toFixed(1)}%`;
+        rc.style.color = renewablePercentChange >= 0 ? "green" : "red";
+
+        document.getElementById("energyUseTotal").textContent =
+            `${totalEnergy.toFixed(1)} Mtoe`;
+
+        const ec = document.getElementById("energyDemandChange");
+        ec.textContent =
+            `${totalEnergyChange >= 0 ? "+" : ""}${totalEnergyChange.toFixed(1)}%`;
+        ec.style.color = totalEnergyChange >= 0 ? "green" : "red";
+    }
 }
+
